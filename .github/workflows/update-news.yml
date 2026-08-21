@@ -1,0 +1,38 @@
+name: تحديث الأخبار عبر Gemini
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  update-news:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run Gemini news updater
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: node scripts/update-news.js
+
+      - name: Commit changes if any
+        run: |
+          git config user.name "news-bot"
+          git config user.email "news-bot@users.noreply.github.com"
+          if git diff --quiet -- data/news.json; then
+            echo "لا يوجد تغيير على data/news.json"
+          else
+            git add data/news.json
+            git commit -m "🤖 تحديث تلقائي للأخبار (Gemini) - $(date -u +'%Y-%m-%d %H:%M UTC')"
+            git push
+          fi
