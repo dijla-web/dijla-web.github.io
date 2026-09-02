@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://dijla-web.github.io/sitemap.xml
